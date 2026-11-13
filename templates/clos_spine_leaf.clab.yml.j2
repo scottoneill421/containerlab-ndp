@@ -1,0 +1,38 @@
+name: {{ lab_id }}
+topology:
+    nodes:
+            # --- Spine Layer --- #
+            {% for s in range(1, spine_count + 1) %}
+            spine{{ '%02d' | format(s) }}:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            {% endfor %}
+
+            # --- Leaf Layer --- #
+            {% for l in range(1, leaf_count + 1) %}
+            leaf{{ '%02d' | format(l) }}:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            {% endfor %}
+
+            # --- Compute / GPU / Host Layer --- #            
+            {% for h in range(1, host_count + 1) %}
+            host{{ '%02d' | format(h) }}:
+                kind: linux
+                image: ghcr.io/srl-labs/network-multitool
+            {% endfor %}
+
+            # --- Spine-to-Lead Full-Mesh Cabling --- #
+            {% for s in range(1, spine_count + 1) %}
+                {% for l in range(1, leaf_count + 1) %}
+            - endpoints: ["spine{{ '%02d' | format(s) }}:eth{{ l }}", "leaf{{ '%02d' | format(l) }}:eth{{ s }}" ]
+                {% endfor %}
+            {% endfor %}
+
+            # --- Lead-to-Host Dual-homes Cabling --- #
+            {% for h in range(1, host_count + 1) %}
+                {% set leaf_idx = ((h - 1) % leaf_count) + 1 %}
+            - endpoints: ["leaf{{ '%02d' | format(leaf_idx) }}:eth10", "host{{ '%02d' | format(h) }}:eth1"]
+            {% endfor %}

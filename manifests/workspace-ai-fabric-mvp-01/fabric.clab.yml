@@ -1,0 +1,95 @@
+name: ai-fabric-mvp-01
+topology:
+    nodes:
+            # --- Spine Layer --- #
+            
+            spine01:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            
+            spine02:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            
+
+            # --- Leaf Layer --- #
+            
+            leaf01:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            
+            leaf02:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            
+            leaf03:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            
+            leaf04:
+                kind: ceos
+                image: ceos:4.32.1F
+                startup-config: configs/leaf.cfg
+            
+
+            # --- Compute / GPU / Host Layer --- #            
+            
+            host01:
+                kind: linux
+                image: ghcr.io/srl-labs/network-multitool
+            
+            host02:
+                kind: linux
+                image: ghcr.io/srl-labs/network-multitool
+            
+            host03:
+                kind: linux
+                image: ghcr.io/srl-labs/network-multitool
+            
+            host04:
+                kind: linux
+                image: ghcr.io/srl-labs/network-multitool
+            
+
+            # --- Spine-to-Lead Full-Mesh Cabling --- #
+            
+                
+            - endpoints: ["spine01:eth1", "leaf01:eth1" ]
+                
+            - endpoints: ["spine01:eth2", "leaf02:eth1" ]
+                
+            - endpoints: ["spine01:eth3", "leaf03:eth1" ]
+                
+            - endpoints: ["spine01:eth4", "leaf04:eth1" ]
+                
+            
+                
+            - endpoints: ["spine02:eth1", "leaf01:eth2" ]
+                
+            - endpoints: ["spine02:eth2", "leaf02:eth2" ]
+                
+            - endpoints: ["spine02:eth3", "leaf03:eth2" ]
+                
+            - endpoints: ["spine02:eth4", "leaf04:eth2" ]
+                
+            
+
+            # --- Lead-to-Host Dual-homes Cabling --- #
+            
+                
+            - endpoints: ["leaf01:eth10", "host01:eth1"]
+            
+                
+            - endpoints: ["leaf02:eth10", "host02:eth1"]
+            
+                
+            - endpoints: ["leaf03:eth10", "host03:eth1"]
+            
+                
+            - endpoints: ["leaf04:eth10", "host04:eth1"]
+            
